@@ -4,6 +4,8 @@ Mathias Jönsson Oct 2014*/
 
 /*### BUG TRACKER ###*
 
+[Game] Even if board is filled (Draw), Generic Win/Loose/End message is displayed. Add code to allow for custom message if game is draw
+[Game] Even if player selects 2 as weapon, PC still uses it. Makes differentiating the board hard and screws up the WinCheck system
 [Structural] PC related variables are the only ones not using a struct. Possibly change that (remember to change it across the code)
 [Not a bug] Visual overhaul. Maybe add better UI if time allows. |X| | | |O| for example
 [Visual Improvement] Display final bord with Win message
@@ -150,28 +152,33 @@ int main(void)
 				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
+			/*Check if the PC has won on horizontal lines*/
 			if (Board[0][0] == 2 && Board[1][0] == 2 && Board[2][0] == 2 || Board[1][0] == 2 && Board[1][1] == 2 && Board[1][2] == 2 || Board[2][0] == 2 && Board[2][1] == 2 && Board[2][2] == 2)
 			{
 				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*VERTICAL CHECK FOR BOTH PLAYER AND AI*/
+			/*Check if the player has won on vertical lines*/
 			if (Board[0][0] == 1 && Board[1][0] == 1 && Board[2][0] == 1 || Board[0][1] == 1 && Board[1][1] == 1 && Board[2][1] == 1 || Board[0][2] == 1 && Board[1][2] == 1 && Board[2][2] == 1)
 			{
-				printf("\n\n\nCONGRATULATIONS. You have won\n\n");											/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
+			/*Check if the PC has won on vertical lines*/
 			if (Board[0][0] == 2 && Board[1][0] == 2 && Board[2][0] == 2 || Board[0][1] == 2 && Board[1][1] == 2 && Board[2][1] == 2 || Board[0][2] == 2 && Board[1][2] == 2 && Board[2][2] == 2)
 			{
 				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*DIAGONAL CHECK FOR BOTH PLAYER AND AI*/
+			/*Check if the player has won on diagonal lines*/
 			if (Board[0][0] == 1 && Board[1][1] == 1 && Board[2][2] == 1 || Board[0][2] == 1 && Board[1][1] == 1 && Board[2][0] == 1)
 			{
 				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
+			/*Check if the PC has won on diagonal lines*/
 			if (Board[0][0] == 2 && Board[1][1] == 2 && Board[2][2] == 2 || Board[0][2] == 2 && Board[1][1] == 2 && Board[2][0] == 2)
 			{
 				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
@@ -191,65 +198,65 @@ int main(void)
 	return 0;																			/*[Portal Turret voice]Goodbye[/Portal Turret voice]*/
 }
 
-int XOSelection(void)																/*Player selects to play as X or O*/
+int XOSelection(void)																	/*Player selects to play as X or O*/
 {
 	int PlayerWeapon;
 	printf("\nWhat do you want to play as ? \nX = 1, O = 2\n");
 	scanf_s("%d", &PlayerWeapon);
 
-	while (PlayerWeapon != 1 || PlayerWeapon != 2)									/*Run while valid weapon isn't selected*/
+	while (PlayerWeapon != 1 || PlayerWeapon != 2)										/*Run while valid weapon isn't selected*/
 	{
-		if (PlayerWeapon == 1 || PlayerWeapon == 2)									/*Break and return value when valid is entered*/
+		if (PlayerWeapon == 1 || PlayerWeapon == 2)										/*Break and return value when valid is entered*/
 		{
 			break;
 		}
 		else
 		{
-			printf("ERROR: Select valid choice\n");									/*Return error as normal if the value isn't allowed*/
+			printf("ERROR: Select valid choice\n");										/*Return error as normal if the value isn't allowed*/
 			scanf_s("%d", &PlayerWeapon);
 		}
 	}
-	return PlayerWeapon;															/*Back to main we go*/
+	return PlayerWeapon;																/*Back to main we go*/
 }
 
 int RowSelection(void)
 {
-	int Pass = 0, Row = 0;								/*Row = The row the player wants. Pass = Checks if the number is valid (1-3)*/
-	while (Pass != 1)									/*While value representing valid choice isn't 1, run loop*/
+	int Pass = 0, Row = 0;																/*Row = The row the player wants. Pass = Checks if the number is valid (1-3)*/
+	while (Pass != 1)																	/*While value representing valid choice isn't 1, run loop*/
 	{
 		printf("Select Row: ");
 		scanf_s("%d", &Row);
 
-		if (Row<1 || Row >3)							/*Check for valid row choice, display error if needed*/
+		if (Row<1 || Row >3)															/*Check for valid row choice, display error if needed*/
 		{
 			printf("ERROR: Select valid row\n");
 		}
 		else
 		{
-			Pass = 1;									/*Represents a valid row choice (1 is valid, anything else is not). Used to control the while loop*/
+			Pass = 1;																	/*Represents a valid row choice (1 is valid, anything else is not). Used to control the while loop*/
 		}
 	}
-	return Row - 1;										/*Adjust for array starting at 0 and then back to main*/
+	return Row - 1;																		/*Adjust for array starting at 0 and then back to main*/
 }
 
-int ColumnSelection(void)								/*Same as RowSeleciton, See it*/
+int ColumnSelection(void)																/*Same as RowSeleciton, See it*/
 {
 	int Pass = 0, Column = 0;
-	while (Pass != 1)									/*Run as long as the choice isn't valid*/
+	while (Pass != 1)																	/*Run as long as the choice isn't valid*/
 	{
 		printf("Select Column: ");
 		scanf_s("%d", &Column);
 
-		if (Column<1 || Column >3)						/*Print error message if the choice isn't 1 - 3 and make the player select again*/
+		if (Column<1 || Column >3)														/*Print error message if the choice isn't 1 - 3 and make the player select again*/
 		{
 			printf("ERROR: Select valid Column\n");
 		}
 		else
 		{
-			Pass = 1;									/*Set pass to 1, ending the loop if the choice is valid*/
+			Pass = 1;																	/*Set pass to 1, ending the loop if the choice is valid*/
 		}
 	}
-	return Column - 1;									/*Adjust for array starting at 0 and then back to main*/
+	return Column - 1;																	/*Adjust for array starting at 0 and then back to main*/
 }
 
 
