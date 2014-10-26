@@ -4,6 +4,7 @@ Mathias Jönsson Oct 2014*/
 
 /*### BUG TRACKER ###*
 
+[Structural] PC related variables are the only ones not using a struct. Possibly change that (remember to change it across the code)
 [Not a bug] Visual overhaul. Maybe add better UI if time allows. |X| | | |O| for example
 [Visual Improvement] Display final bord with Win message
 [Code Cleanup] Is GameControl.Winner needed since break; is used ? Remove if unneeded. Check for other places where code can be streamlined
@@ -58,27 +59,36 @@ int main(void)
 
 	/*CONTAINS GAME CONTROL RELATED VARIABLES*/
 	struct GameControlVariables GameControl;
-	int Winner = 0;																	/*Used by the CheckWinner() function, this marks if a winner is found or not. Used to end the while loop*/
 	int RunCount = 0;																/*Counts the number of rounds in the game, keeps it from running for longer then it takes to fill the board*/
 
 	/*CONTAINRS PC AI RELATED VARIABLES*/
 	unsigned Seed;	
 	Seed = (unsigned)time(NULL);													/*RNG for computer opponents selections*/
 	srand(Seed);																	/*Randomize using the unnasigned seed*/
+	
 	int PCRow;																		/*PC row selection*/
 	int PCColumn;																	/*PC column selection*/
 	int PCChoiceUnique = 0;															/*Check if PC slot selection is unique*/
+	int PCWeapon = 0;
 
 	/*START OF MAIN PROGRAM LOOP. CONTROLS WHEN TO CLOSE OR RE-RUN THE PROGRAM*/
 	while (PVariables.PlayerMenuChoice != 2)										/*Run until explicit exit conditions are met (Player decides to exit using PlayerMenuChoice)*/
 	{ 
 		int Board[BOARDSIZE][BOARDSIZE] = { 0 };									/*Create game board, 3x3 square, normal state being 0, player selected being 1 and PC selection being 2*/
 		PVariables.PlayerWeapon = XOSelection();									/*Run XO selection to make player decide to use X or O*/
+		
+		if (PVariables.PlayerWeapon == 1)											/*Checks what weapon the player selects, and invert if for the PC*/
+		{	
+			PCWeapon = 2;
+		}
+		else if (PVariables.PlayerWeapon==2)
+		{
+			PCWeapon = 1;
+		}
 		GameControl.RunCount = 0;													/*Set RunCount to 0, and reset RunCount to 0 after each game, so that the game doesn't immidiatly end*/
-		GameControl.Winner = 0;														/*Set Winner to 0, and reset it after each game, so the loop doesn't immidiatly end*/
 
 		/*START OF TURN LOOP. ACTUAL GAME RUNS HERE*/
-		while (GameControl.Winner == 0 || GameControl.RunCount <= 3)				/*One run of this loop is one 'turn'*/
+		while (GameControl.RunCount <= 3)											/*One run of this loop is one 'turn', run until someone has won or the board is filled*/
 		{
 			PCChoiceUnique = 0;														/*Reset the PC unique test between turns*/
 			PVariables.ChoiceUnique = 0;											/*Reset the player unique test between turns*/
@@ -104,13 +114,13 @@ int main(void)
 
 				if (Board[PVariables.Row][PVariables.Column] == 1 || Board[PVariables.Row][PVariables.Column] == 2)	/*Make the user enter new coordinates if the previous ones are taken*/
 				{
-					printf("ERROR: Slot is already taken. Please select a new slot");
-					PVariables.Row = RowSelection;
-					PVariables.Column = ColumnSelection;
+					printf("\nERROR: Slot is already taken. Please select a new slot\n");
+					PVariables.Row = RowSelection();
+					PVariables.Column = ColumnSelection();
 				}
 				else if (Board[PVariables.Row][PVariables.Column] == 0)
 				{
-					Board[PVariables.Row][PVariables.Column] = 1;
+					Board[PVariables.Row][PVariables.Column] = PVariables.PlayerWeapon;
 					PVariables.ChoiceUnique = 1;										/*Marks choice as valid and exits the loop*/
 				}
 			}
@@ -137,40 +147,34 @@ int main(void)
 			/*Checks if the Player has won on the horizontal lines (3 in a horizontal row)*/
 			if (Board[0][0] == 1 && Board[0][1] == 1 && Board[0][2] == 1 || Board[1][0] == 1 && Board[1][1] == 1 && Board[1][2] == 1 || Board[2][0] == 1 && Board[2][1] == 1 && Board[2][2] == 1)
 			{
-				printf("\n\n\nCONGRATULATIONS. You have won\n\n");
-				GameControl.Winner = 1;													/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			if (Board[0][0] == 2 && Board[1][0] == 2 && Board[2][0] == 2 || Board[1][0] == 2 && Board[1][1] == 2 && Board[1][2] == 2 || Board[2][0] == 2 && Board[2][1] == 2 && Board[2][2] == 2)
 			{
-				printf("\n\n\nOH NO! The computer has won\n\n");
-				GameControl.Winner = 1;													/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*VERTICAL CHECK FOR BOTH PLAYER AND AI*/
 			if (Board[0][0] == 1 && Board[1][0] == 1 && Board[2][0] == 1 || Board[0][1] == 1 && Board[1][1] == 1 && Board[2][1] == 1 || Board[0][2] == 1 && Board[1][2] == 1 && Board[2][2] == 1)
 			{
-				printf("\n\n\nCONGRATULATIONS. You have won\n\n");
-				GameControl.Winner = 1;													/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nCONGRATULATIONS. You have won\n\n");											/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			if (Board[0][0] == 2 && Board[1][0] == 2 && Board[2][0] == 2 || Board[0][1] == 2 && Board[1][1] == 2 && Board[2][1] == 2 || Board[0][2] == 2 && Board[1][2] == 2 && Board[2][2] == 2)
 			{
-				printf("\n\n\nOH NO! The computer has won\n\n");
-				GameControl.Winner = 1;													/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*DIAGONAL CHECK FOR BOTH PLAYER AND AI*/
 			if (Board[0][0] == 1 && Board[1][1] == 1 && Board[2][2] == 1 || Board[0][2] == 1 && Board[1][1] == 1 && Board[2][0] == 1)
 			{
-				printf("\n\n\nCONGRATULATIONS. You have won\n\n");
-				GameControl.Winner = 1;													/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			if (Board[0][0] == 2 && Board[1][1] == 2 && Board[2][2] == 2 || Board[0][2] == 2 && Board[1][1] == 2 && Board[2][0] == 2)
 			{
-				printf("\n\n\nOH NO! The computer has won\n\n");
-				GameControl.Winner = 1;													/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			else
@@ -180,7 +184,7 @@ int main(void)
 			}
 		}
 		/*POST-GAME MENY. EXIT OR PLAY AGAIN*/
-		printf("\n\n\nWhat do you want do do now?\n");
+		printf("\n\nGame has ended\n\n\nWhat do you want do do now?\n");
 		printf("Press 1 to play again\nPress 2 to exit ");
 		scanf_s("%d", &PVariables.PlayerMenuChoice);
 	}

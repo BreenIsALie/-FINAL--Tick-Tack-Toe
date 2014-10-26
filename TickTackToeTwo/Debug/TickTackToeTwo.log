@@ -1,13 +1,11 @@
-﻿Build started 2014-10-26 21:47:20.
+﻿Build started 2014-10-26 22:09:25.
      1>Project "C:\Users\Sickan\Documents\Visual Studio 2013\Projects\-FINAL--Tick-Tack-Toe\TickTackToeTwo\TickTackToeTwo.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt Source.c
          Source.c
-     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(67): warning C4013: 'time' undefined; assuming extern returning int
-     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(109): warning C4047: '=' : 'int' differs in levels of indirection from 'int (__cdecl *)()'
-     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(110): warning C4047: '=' : 'int' differs in levels of indirection from 'int (__cdecl *)()'
-     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(69): warning C4101: 'PCRow' : unreferenced local variable
-     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(70): warning C4101: 'PCColumn' : unreferenced local variable
+     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(66): warning C4013: 'time' undefined; assuming extern returning int
+     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(68): warning C4101: 'PCRow' : unreferenced local variable
+     1>c:\users\sickan\documents\visual studio 2013\projects\-final--tick-tack-toe\ticktacktoetwo\source.c(69): warning C4101: 'PCColumn' : unreferenced local variable
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Sickan\Documents\Visual Studio 2013\Projects\-FINAL--Tick-Tack-Toe\Debug\TickTackToeTwo.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Sickan\Documents\Visual Studio 2013\Projects\-FINAL--Tick-Tack-Toe\Debug\TickTackToeTwo.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Sickan\Documents\Visual Studio 2013\Projects\-FINAL--Tick-Tack-Toe\Debug\TickTackToeTwo.lib" /MACHINE:X86 Debug\Source.obj
          TickTackToeTwo.vcxproj -> C:\Users\Sickan\Documents\Visual Studio 2013\Projects\-FINAL--Tick-Tack-Toe\Debug\TickTackToeTwo.exe
@@ -15,4 +13,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.94
+Time Elapsed 00:00:00.25
