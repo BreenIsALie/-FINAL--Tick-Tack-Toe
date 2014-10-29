@@ -4,13 +4,12 @@ Mathias Jönsson Oct 2014*/
 
 /*### BUG TRACKER ###*
 
-[Game] Even if board is filled (Draw), Generic Win/Loose/End message is displayed. Add code to allow for custom message if game is draw
-[Game] Even if player selects 2 as weapon, PC still uses it. Makes differentiating the board hard and screws up the WinCheck system
+[Structural] Change win checking code from wall of if statements to loops
 [Structural] PC related variables are the only ones not using a struct. Possibly change that (remember to change it across the code)
-[Not a bug] Visual overhaul. Maybe add better UI if time allows. |X| | | |O| for example
-[Visual Improvement] Display final bord with Win message
-[Code Cleanup] Is GameControl.Winner needed since break; is used ? Remove if unneeded. Check for other places where code can be streamlined
 
+[Visual Improvement] Display final bord with Win message
+
+[Code Cleanup] Get rid of warning message during compile
 #####################
 */
 
@@ -20,12 +19,12 @@ Mathias Jönsson Oct 2014*/
 #define BOARDSIZE 3
 
 /*FUNCTION DECLARATION*/
-int XOSelection();
 int RowSelection();
 int ColumnSelection();
+int CheckBoardFull(int *Board[BOARDSIZE][BOARDSIZE]);
 
 /*PLAYER RELATED STRUCT AND VARIABLE DECLARATION*/
-struct PlayerVariables				/*Struct containing player related variables*/	
+struct PlayerVariables				/*Struct containing player related variables*/
 {
 	int Row;						/*Which row (0-2) the player wants to place his marker in*/
 	int Column;						/*Which column (0-2) the player wants to place his marker in*/
@@ -43,16 +42,17 @@ struct ForLoopVariables				/*Variables related to array for loops. Counters to g
 struct GameControlVariables			/*Variables related to control of the game itself, such as the Winner int (Goes to 1 if winner is found) and the turn (run) counter*/
 {
 	int RunCount;					/*Turn counter. Ticks up 1 for each run of the while loop. Used to stop the game when the board is filled*/
-	int Winner;						/*Game checks this to see if a winner is found. This, as well as the RunCount can stop the while loop*/
+	int PCRunCount;
+	int BoardFilled;
 };
 
 int main(void)
 {
 	/*CONTAINS ALL THE PLAYER RELATED VARIABLES*/
 	struct PlayerVariables PVariables;
-	PVariables.PlayerMenuChoice = 0;		/*Stores the choice the player makes once the game is over (Play again or exit)*/
-	PVariables.PlayerWeapon = 0;			/*Stores which 'weapon' the player selects (1 = X, 2 = O)*/
-	PVariables.ChoiceUnique = 0;			/*Used to check if the slot choice the player makes is free and valid. 1 for valid, 0 for invalid*/
+	PVariables.PlayerMenuChoice = 0;												/*Stores the choice the player makes once the game is over (Play again or exit)*/
+	PVariables.PlayerWeapon = 1;													/*Player Weapon (Marker)*/
+	PVariables.ChoiceUnique = 0;													/*Used to check if the slot choice the player makes is free and valid. 1 for valid, 0 for invalid*/
 
 	/*CONTAINS WIN CONDITION CHECKING AND BOARD PRINT VARIABLES*/
 	struct ForLoopVariables WinVariables;
@@ -62,35 +62,28 @@ int main(void)
 	/*CONTAINS GAME CONTROL RELATED VARIABLES*/
 	struct GameControlVariables GameControl;
 	int RunCount = 0;																/*Counts the number of rounds in the game, keeps it from running for longer then it takes to fill the board*/
+	int PCRunCount;
+	int BoardFilled = 0;
 
 	/*CONTAINRS PC AI RELATED VARIABLES*/
-	unsigned Seed;	
-	Seed = (unsigned)time(NULL);													/*RNG for computer opponents selections*/
-	srand(Seed);																	/*Randomize using the unnasigned seed*/
-	
 	int PCRow;																		/*PC row selection*/
 	int PCColumn;																	/*PC column selection*/
 	int PCChoiceUnique = 0;															/*Check if PC slot selection is unique*/
-	int PCWeapon = 0;
+
+	/*RANDOMIZER RELATED VARIABLES*/
+	unsigned Seed;
+	Seed = (unsigned)time(NULL);													/*RNG for computer opponents selections*/
+	srand(Seed);																	/*Randomize using the unnasigned seed*/
 
 	/*START OF MAIN PROGRAM LOOP. CONTROLS WHEN TO CLOSE OR RE-RUN THE PROGRAM*/
 	while (PVariables.PlayerMenuChoice != 2)										/*Run until explicit exit conditions are met (Player decides to exit using PlayerMenuChoice)*/
-	{ 
+	{
 		int Board[BOARDSIZE][BOARDSIZE] = { 0 };									/*Create game board, 3x3 square, normal state being 0, player selected being 1 and PC selection being 2*/
-		PVariables.PlayerWeapon = XOSelection();									/*Run XO selection to make player decide to use X or O*/
-		
-		if (PVariables.PlayerWeapon == 1)											/*Checks what weapon the player selects, and invert if for the PC*/
-		{	
-			PCWeapon = 2;
-		}
-		else if (PVariables.PlayerWeapon==2)
-		{
-			PCWeapon = 1;
-		}
-		GameControl.RunCount = 0;													/*Set RunCount to 0, and reset RunCount to 0 after each game, so that the game doesn't immidiatly end*/
+		printf("\n { Welcome to Tick Tack Toe }\n");
+		GameControl.RunCount = 1;													/*Set RunCount to 0, and reset RunCount to 0 after each game, so that the game doesn't immidiatly end*/
 
 		/*START OF TURN LOOP. ACTUAL GAME RUNS HERE*/
-		while (GameControl.RunCount <= 3)											/*One run of this loop is one 'turn', run until someone has won or the board is filled*/
+		while (GameControl.RunCount <= 5 || BoardFilled != 1)											/*One run of this loop is one 'turn', run until someone has won or the board is filled*/
 		{
 			PCChoiceUnique = 0;														/*Reset the PC unique test between turns*/
 			PVariables.ChoiceUnique = 0;											/*Reset the player unique test between turns*/
@@ -101,7 +94,18 @@ int main(void)
 			{
 				for (WinVariables.Counter2 = 0; WinVariables.Counter2 < BOARDSIZE; WinVariables.Counter2++)				/*Runs every 3 rounds to make the print "step down"*/
 				{
-					printf(" %d ", Board[WinVariables.Counter1][WinVariables.Counter2]);								/*Takes the position from Counter1 and Counter2 and print the slots contents*/
+					if (Board[WinVariables.Counter1][WinVariables.Counter2] == 0)
+					{
+						printf("| |");
+					}
+					else if (Board[WinVariables.Counter1][WinVariables.Counter2] == 1)
+					{
+						printf("|X|");
+					}
+					else if (Board[WinVariables.Counter1][WinVariables.Counter2] == 2)
+					{
+						printf("|O|");
+					}
 				}
 				printf("\n");																							/*Make it step down each 3 rounds, creating the 3x3 square*/
 			}
@@ -127,9 +131,13 @@ int main(void)
 				}
 			}
 
+			GameControl.BoardFilled = CheckBoardFull(*Board);
+
 			/*PC INPUT SECTION*/
-			while (PCChoiceUnique != 1)
+			GameControl.PCRunCount = 0;
+			while (PCChoiceUnique != 1 && GameControl.BoardFilled == 0)
 			{
+
 				int PCRow = (rand() % 3);												/*Set PC row choice to something between 1 and 3*/
 				int PCColumn = (rand() % 3);											/*Set PC column choice to something between 1 and 3*/
 
@@ -137,6 +145,7 @@ int main(void)
 				{
 					int PCRow = (rand() % 3);
 					int PCColumn = (rand() % 3);
+					GameControl.PCRunCount++;
 				}
 				else if (Board[PCRow][PCColumn] == 0)									/*If valid choice is taken, add marker to board and mark choice as valid, exit loop*/
 				{
@@ -144,81 +153,69 @@ int main(void)
 					PCChoiceUnique = 1;
 				}
 			}
+			GameControl.BoardFilled = CheckBoardFull(*Board);
 			/*COMPARISON / WINCHECK SECTION*/
 			/*HORIZONTAL CHECK FOR BOTH PLAYER AND AI*/
 			/*Checks if the Player has won on the horizontal lines (3 in a horizontal row)*/
 			if (Board[0][0] == 1 && Board[0][1] == 1 && Board[0][2] == 1 || Board[1][0] == 1 && Board[1][1] == 1 && Board[1][2] == 1 || Board[2][0] == 1 && Board[2][1] == 1 && Board[2][2] == 1)
 			{
-				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nCONGRATULATIONS. You have won\n\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*Check if the PC has won on horizontal lines*/
 			if (Board[0][0] == 2 && Board[1][0] == 2 && Board[2][0] == 2 || Board[1][0] == 2 && Board[1][1] == 2 && Board[1][2] == 2 || Board[2][0] == 2 && Board[2][1] == 2 && Board[2][2] == 2)
 			{
-				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nOH NO! The computer has won\n\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*VERTICAL CHECK FOR BOTH PLAYER AND AI*/
 			/*Check if the player has won on vertical lines*/
 			if (Board[0][0] == 1 && Board[1][0] == 1 && Board[2][0] == 1 || Board[0][1] == 1 && Board[1][1] == 1 && Board[2][1] == 1 || Board[0][2] == 1 && Board[1][2] == 1 && Board[2][2] == 1)
 			{
-				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nCONGRATULATIONS. You have won\n\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*Check if the PC has won on vertical lines*/
 			if (Board[0][0] == 2 && Board[1][0] == 2 && Board[2][0] == 2 || Board[0][1] == 2 && Board[1][1] == 2 && Board[2][1] == 2 || Board[0][2] == 2 && Board[1][2] == 2 && Board[2][2] == 2)
 			{
-				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nOH NO! The computer has won\n\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*DIAGONAL CHECK FOR BOTH PLAYER AND AI*/
 			/*Check if the player has won on diagonal lines*/
 			if (Board[0][0] == 1 && Board[1][1] == 1 && Board[2][2] == 1 || Board[0][2] == 1 && Board[1][1] == 1 && Board[2][0] == 1)
 			{
-				printf("\n\n\nCONGRATULATIONS. You have won\n\n");												/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nCONGRATULATIONS. You have won\n\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			/*Check if the PC has won on diagonal lines*/
 			if (Board[0][0] == 2 && Board[1][1] == 2 && Board[2][2] == 2 || Board[0][2] == 2 && Board[1][1] == 2 && Board[2][0] == 2)
 			{
-				printf("\n\n\nOH NO! The computer has won\n\n");												/*Tell game a winner has been found, then exit loop*/
+				printf("\n\n\nOH NO! The computer has won\n\n\n");												/*Tell game a winner has been found, then exit loop*/
 				break;
 			}
 			else
 			{
-				GameControl.RunCount++;													/*Make the turn counter tick up one step*/
-				GameControl.Winner = 0;													/*Keep winner as 0 if no one has won*/
+				if (GameControl.BoardFilled == 1)
+				{
+					printf("\n\nDraw. You both loose\n\n");
+					break;
+				}
+				else
+				{
+					GameControl.RunCount++;																			/*Make the turn counter tick up one step*/
+				}
+
 			}
 		}
 		/*POST-GAME MENY. EXIT OR PLAY AGAIN*/
-		printf("\n\nGame has ended\n\n\nWhat do you want do do now?\n");
 		printf("Press 1 to play again\nPress 2 to exit ");
 		scanf_s("%d", &PVariables.PlayerMenuChoice);
 	}
 	return 0;																			/*[Portal Turret voice]Goodbye[/Portal Turret voice]*/
 }
 
-int XOSelection(void)																	/*Player selects to play as X or O*/
-{
-	int PlayerWeapon;
-	printf("\nWhat do you want to play as ? \nX = 1, O = 2\n");
-	scanf_s("%d", &PlayerWeapon);
-
-	while (PlayerWeapon != 1 || PlayerWeapon != 2)										/*Run while valid weapon isn't selected*/
-	{
-		if (PlayerWeapon == 1 || PlayerWeapon == 2)										/*Break and return value when valid is entered*/
-		{
-			break;
-		}
-		else
-		{
-			printf("ERROR: Select valid choice\n");										/*Return error as normal if the value isn't allowed*/
-			scanf_s("%d", &PlayerWeapon);
-		}
-	}
-	return PlayerWeapon;																/*Back to main we go*/
-}
-
+/*FUNCTION TO LET THE PLAYER SELECT A ROW HERE*/
 int RowSelection(void)
 {
 	int Pass = 0, Row = 0;																/*Row = The row the player wants. Pass = Checks if the number is valid (1-3)*/
@@ -239,6 +236,7 @@ int RowSelection(void)
 	return Row - 1;																		/*Adjust for array starting at 0 and then back to main*/
 }
 
+/*FUNCTION TO LET THE PLAYER SELECT A COLUMN HERE*/
 int ColumnSelection(void)																/*Same as RowSeleciton, See it*/
 {
 	int Pass = 0, Column = 0;
@@ -259,4 +257,28 @@ int ColumnSelection(void)																/*Same as RowSeleciton, See it*/
 	return Column - 1;																	/*Adjust for array starting at 0 and then back to main*/
 }
 
+/*FUNCTIONS TO CHECK IF THE BOARD IS FILLED*/
+int CheckBoardFull(int *Board[BOARDSIZE][BOARDSIZE])
+{
+	/*Check if the board is filled. Break and declare tie if it is and no winner has been detected*/
+	int CheckCounter1, CheckCounter2;
+
+	for (CheckCounter1 = 0; CheckCounter1 < 3; CheckCounter1++)
+	{
+		for (CheckCounter2 = 0; CheckCounter2 < 3; CheckCounter2++)
+		{
+			if (Board[CheckCounter1][CheckCounter2] == 0)
+			{
+				return 0;
+			}
+			/*else if (Board[CheckCounter1][CheckCounter2] != 0)
+			{
+			printf("\n\nDraw. You both loose\n\n");
+			return 1;
+			}*/
+		}
+	}
+	//printf("\n\nDraw. You both loose\n\n");
+	return 1;
+}
 
